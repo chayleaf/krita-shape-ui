@@ -2,6 +2,7 @@ from PyQt5.QtCore import QPoint, QRectF
 from PyQt5.QtWidgets import (
     QWidget,
     QComboBox,
+    QDoubleSpinBox,
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
@@ -25,10 +26,12 @@ class KritaShapeUIDocker(DockWidget):
         l2 = QHBoxLayout()
         l3 = QHBoxLayout()
         l4 = QHBoxLayout()
+        l5 = QHBoxLayout()
         layout.addLayout(l1)
         layout.addLayout(l2)
         layout.addLayout(l3)
         layout.addLayout(l4)
+        layout.addLayout(l5)
         self.x1 = self.coord_box()
         self.y1 = self.coord_box()
         l1.addWidget(self.x1)
@@ -37,15 +40,19 @@ class KritaShapeUIDocker(DockWidget):
         self.y2 = self.coord_box()
         l2.addWidget(self.x2)
         l2.addWidget(self.y2)
+        self.p1 = self.pressure_box()
+        self.p2 = self.pressure_box()
+        l3.addWidget(self.p1)
+        l3.addWidget(self.p2)
         flipX = QPushButton(i18n("Flip X"))
         flipY = QPushButton(i18n("Flip Y"))
         drawBtn = QPushButton(i18n("Draw"))
         selBtn = QPushButton(i18n("Use Selection"))
-        l4.addWidget(self.shape)
-        l4.addWidget(drawBtn)
-        l3.addWidget(flipX)
-        l3.addWidget(flipY)
-        l3.addWidget(selBtn)
+        l5.addWidget(self.shape)
+        l5.addWidget(drawBtn)
+        l4.addWidget(flipX)
+        l4.addWidget(flipY)
+        l4.addWidget(selBtn)
         flipX.released.connect(self.slot_flip_x)
         flipY.released.connect(self.slot_flip_y)
         drawBtn.released.connect(self.slot_draw)
@@ -58,7 +65,9 @@ class KritaShapeUIDocker(DockWidget):
         x1, y1, x2, y2 = self.get_coords()
         shape = self.shape.currentIndex()
         if shape == 0:
-            node.paintLine(QPoint(x1, y1), QPoint(x2, y2))
+            node.paintLine(
+                QPoint(x1, y1), QPoint(x2, y2), self.p1.value(), self.p2.value()
+            )
         elif shape == 1:
             node.paintEllipse(QRectF(x1, y1, x2 - x1, y2 - y1))
         elif shape == 2:
@@ -96,6 +105,14 @@ class KritaShapeUIDocker(DockWidget):
         ret.setSingleStep(1)
         ret.setMinimum(-99999)
         ret.setMaximum(99999)
+        return ret
+
+    def pressure_box(self) -> QDoubleSpinBox:
+        ret = QDoubleSpinBox()
+        ret.setSingleStep(0.01)
+        ret.setMaximum(1.0)
+        ret.setMinimum(0.0)
+        ret.setValue(1.0)
         return ret
 
     def canvasChanged(self, canvas):
